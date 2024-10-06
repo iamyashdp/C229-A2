@@ -42,7 +42,35 @@ const getProductsByID = async (req, res) => {
   }
 };
 
+// Delete all products from mongodb
+const deleteAllProducts =  async (req, res) => {
+  try {
+    const result = await Product.deleteMany({});
+    res.status(200).send({ message: `${result.deletedCount} products deleted successfully` });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+// Delete product by ID
+const deleteProductByID = async (req, res) => {
+  try {
+    const productID = req.params.id;
+    const product = await Product.findByIdAndDelete(productID);
+
+    if (!product) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    res.status(200).send({ message: "Product deleted successfully" });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(404).send({ error: "Invalid product ID" });
+    }
+
+    res.status(500).send(err);
+  }
+};
 
 
-
-module.exports = { createProduct, getAllProducts, getProductsByID };
+module.exports = { createProduct, getAllProducts, getProductsByID, deleteAllProducts ,deleteProductByID };
