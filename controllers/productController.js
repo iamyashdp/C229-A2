@@ -42,6 +42,27 @@ const getProductsByID = async (req, res) => {
   }
 };
 
+//update by id
+const updateProductByID = async (req, res) => {
+  try {
+    const productID = req.params.id;
+    const product = await Product.findByIdAndUpdate(productID, req.body, { new: true, runValidators: true });
+
+    if (!product) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    res.status(200).send(product);
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(404).send({ error: "Invalid product ID" });
+    }
+
+    res.status(400).send(err);
+  }
+
+}
+
 // Delete all products from mongodb
 const deleteAllProducts =  async (req, res) => {
   try {
@@ -73,4 +94,4 @@ const deleteProductByID = async (req, res) => {
 };
 
 
-module.exports = { createProduct, getAllProducts, getProductsByID, deleteAllProducts ,deleteProductByID };
+module.exports = { createProduct, getAllProducts, getProductsByID, updateProductByID, deleteAllProducts ,deleteProductByID };
