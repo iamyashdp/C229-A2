@@ -11,16 +11,6 @@ const createProduct = async (req, res) => {
   }
 };
 
-// Get all products from mongodb
-const getAllProducts = async (req, res) => {
-  try {
-    products = await Product.find();
-    res.status(200).send(products);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-
-};
 
 // Get products by ID
 const getProductsByID = async (req, res) => {
@@ -60,8 +50,7 @@ const updateProductByID = async (req, res) => {
 
     res.status(400).send(err);
   }
-
-}
+};
 
 // Delete all products from mongodb
 const deleteAllProducts =  async (req, res) => {
@@ -94,4 +83,34 @@ const deleteProductByID = async (req, res) => {
 };
 
 
-module.exports = { createProduct, getAllProducts, getProductsByID, updateProductByID, deleteAllProducts ,deleteProductByID };
+// Search products by name or get all products
+const searchProductsByName = async (req, res) => {
+  try {
+    // Check if 'name' query exists
+    const productName = req.query.name;
+    console.log("Searching for product with name:", productName);
+    // Initialize an empty query object
+    let query = {};
+
+    // If a name query parameter is provided, search by name using a case-insensitive regex, Case-insensitive search
+    if (productName) {
+      query.name = { $regex: productName, $options: 'i' };  
+    }
+
+    // Fetch products based on the query (either all products or filtered by name)
+    const products = await Product.find(query);
+
+    // Check if no products were found
+    if (products.length === 0) {
+      return res.status(404).send({ message: 'No products found' });
+    }
+
+    // Return the matching products
+    res.status(200).send(products);
+  } catch (err) {
+    res.status(500).send({ error: 'An error occurred while searching for products' });
+  }
+};
+
+
+module.exports = { createProduct, getProductsByID, updateProductByID, deleteAllProducts ,deleteProductByID, searchProductsByName };
